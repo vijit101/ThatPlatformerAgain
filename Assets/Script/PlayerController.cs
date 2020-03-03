@@ -6,22 +6,28 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public Animator playerAnimator;
-    public AnimationClip Jump;
+    [Tooltip("Move Speed is set static in crouch after experimentation")]
     public float moveSpeed, jumpForce;
     float horizontalValue,verticalValue;
+    Vector2 originalColliderSize,originalOffset;
     Rigidbody2D rgbd;
+    BoxCollider2D PlayerCollider;
 
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
+        PlayerCollider = GetComponent<BoxCollider2D>();
+        originalColliderSize = PlayerCollider.size;
+        originalOffset = PlayerCollider.offset;
     }
     // Update is called once per frame
     void Update()
     {
         GetHorizontalInput();
         GetVerticalInput();
-        MovePlayer(horizontalValue,verticalValue);
-        InputForJump();
+        MoveJumpPlayer(horizontalValue,verticalValue);
+        PlayJumpAnimation();
+        InputForCrouch();
         SetAnimatorSpeedValue();        
     }
 
@@ -55,7 +61,7 @@ public class PlayerController : MonoBehaviour
         transform.localScale = scale;
     }
 
-    private void MovePlayer(float horizontal,float vertical)
+    private void MoveJumpPlayer(float horizontal,float vertical)
     {
         Vector2 pos = transform.position;
         pos.x = pos.x + horizontal * moveSpeed*Time.deltaTime;
@@ -66,7 +72,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void InputForJump()
+    private void PlayJumpAnimation()
     {
         if (verticalValue>0)
         {
@@ -75,6 +81,24 @@ public class PlayerController : MonoBehaviour
         else
         {
             playerAnimator.SetBool("isJump", false);
+        }
+    }
+
+    private void InputForCrouch()
+    {
+        if(Input.GetKey(KeyCode.S)|| Input.GetKey(KeyCode.DownArrow))
+        {
+            playerAnimator.SetBool("isCrouch", true);
+            PlayerCollider.size = new Vector2(PlayerCollider.size.x, 1.2f);
+            PlayerCollider.offset = new Vector2(PlayerCollider.offset.x, .6f);
+            moveSpeed = 6; // moves slow when crouching
+        }
+        else
+        {
+            playerAnimator.SetBool("isCrouch", false);
+            PlayerCollider.size = originalColliderSize;
+            PlayerCollider.offset = originalOffset;
+            moveSpeed = 8;
         }
     }
 
