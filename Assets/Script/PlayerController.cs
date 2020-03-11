@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     Vector2 originalColliderSize,originalOffset;
     Rigidbody2D rgbd;
     BoxCollider2D PlayerCollider;
+    public ScoreController scoreController;
 
     private void Awake()
     {
